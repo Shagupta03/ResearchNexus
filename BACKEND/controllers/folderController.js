@@ -1,11 +1,9 @@
-// controllers/folderController.js - Folder Controller
-
 const Folder = require('../models/Folder');
 
 // Create Folder
 exports.createFolder = async (req, res) => {
     try {
-        const { Name, Visibility, ownerEmail } = req.body;
+        const { Name, Visibility, ownerGroupId } = req.body;
 
         const lastFolder = await Folder.findOne().sort({ id: -1 });
         const newId = lastFolder ? lastFolder.id + 1 : 1;
@@ -14,7 +12,7 @@ exports.createFolder = async (req, res) => {
             Name,
             id: newId,
             Visibility,
-            ownerEmail
+            ownerGroupId
         });
 
         await newFolder.save();
@@ -27,11 +25,11 @@ exports.createFolder = async (req, res) => {
 // Get All Folders
 exports.getFolders = async (req, res) => {
     try {
-        const { ownerEmail } = req.query;
+        const { ownerGroupId } = req.query;
 
         const folders = await Folder.find({
             $or: [
-                { ownerEmail: ownerEmail },
+                { ownerGroupId: parseInt(ownerGroupId) },
                 { Visibility: true }
             ]
         });
@@ -63,12 +61,12 @@ exports.updateFolder = async (req, res) => {
 // Search Folders
 exports.searchFolders = async (req, res) => {
     try {
-        const { query, ownerEmail } = req.query;
+        const { query, ownerGroupId } = req.query;
 
         const folders = await Folder.find({
             Name: { $regex: query, $options: 'i' },
             $or: [
-                { ownerEmail: ownerEmail },
+                { ownerGroupId: parseInt(ownerGroupId) },
                 { Visibility: true }
             ]
         });

@@ -40,7 +40,7 @@ function Dashboard({ user, userType, onLogout }) {
 
     const loadFolders = async () => {
         try {
-            const response = await getFolders(user.Gmail);
+            const response = await getFolders(user.GroupId);
             setFolders(response.data);
         } catch (error) {
             console.error('Error loading folders:', error);
@@ -49,7 +49,7 @@ function Dashboard({ user, userType, onLogout }) {
 
     const loadFiles = async (folderId) => {
         try {
-            const response = await getFilesByFolder(folderId, user.Gmail);
+            const response = await getFilesByFolder(folderId, user.GroupId);
             setFiles(response.data);
         } catch (error) {
             console.error('Error loading files:', error);
@@ -62,7 +62,7 @@ function Dashboard({ user, userType, onLogout }) {
             await createFolder({
                 Name: folderName,
                 Visibility: folderVisibility,
-                ownerEmail: user.Gmail
+                ownerGroupId: user.GroupId
             });
             setFolderName('');
             setShowCreateFolder(false);
@@ -79,7 +79,7 @@ function Dashboard({ user, userType, onLogout }) {
             formData.append('Name', fileName);
             formData.append('Folder', selectedFolder.id);
             formData.append('Visibility', fileVisibility);
-            formData.append('ownerEmail', user.Gmail);
+            formData.append('ownerGroupId', user.GroupId);
             formData.append('file', selectedFile);
 
             await uploadFile(formData);
@@ -101,8 +101,8 @@ function Dashboard({ user, userType, onLogout }) {
             return;
         }
         try {
-            const folderResponse = await searchFolders(searchQuery, user.Gmail);
-            const fileResponse = await searchFiles(searchQuery, user.Gmail);
+            const folderResponse = await searchFolders(searchQuery, user.GroupId);
+            const fileResponse = await searchFiles(searchQuery, user.GroupId);
 
             setFolders(folderResponse.data);
 
@@ -121,7 +121,7 @@ function Dashboard({ user, userType, onLogout }) {
     const handleDeleteFolder = async (id) => {
         if (window.confirm('Delete this folder?')) {
             try {
-            await deleteFolder(id);
+                await deleteFolder(id);
                 loadFolders();
                 setSelectedFolder(null);
                 setFiles([]);
@@ -226,7 +226,7 @@ function Dashboard({ user, userType, onLogout }) {
                                 </div>
                             </div>
 
-                            {folder.ownerEmail === user.Gmail && (
+                            {folder.ownerGroupId === user.GroupId && (
                                 <div className="folder-actions">
                                     <button
                                         className="edit-btn"
@@ -268,7 +268,7 @@ function Dashboard({ user, userType, onLogout }) {
                                                 Download
                                             </button>
 
-                                            {file.ownerEmail === user.Gmail && (
+                                            {file.ownerGroupId === user.GroupId && (
                                                 <button className="delete-btn"
                                                     onClick={() => handleDeleteFile(file.id)}
                                                 >

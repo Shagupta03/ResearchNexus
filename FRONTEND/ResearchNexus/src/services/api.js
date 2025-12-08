@@ -29,16 +29,18 @@ export const createFolder = (data) => {
     return api.post('/folders', data);
 };
 
-export const getFolders = (ownerEmail) => {
-    return api.get('/folders', { params: { ownerEmail } });
+// UPDATED: ownerGroupId instead of ownerEmail
+export const getFolders = (ownerGroupId) => {
+    return api.get('/folders', { params: { ownerGroupId } });
 };
 
 export const updateFolder = (id, data) => {
     return api.put(`/folders/${id}`, data);
 };
 
-export const searchFolders = (query, ownerEmail) => {
-    return api.get('/folders/search', { params: { query, ownerEmail } });
+// UPDATED: ownerGroupId instead of ownerEmail
+export const searchFolders = (query, ownerGroupId) => {
+    return api.get('/folders/search', { params: { query, ownerGroupId } });
 };
 
 export const deleteFolder = (id) => {
@@ -54,12 +56,14 @@ export const uploadFile = (formData) => {
     });
 };
 
-export const getFilesByFolder = (folderId, ownerEmail) => {
-    return api.get('/files', { params: { folderId, ownerEmail } });
+// UPDATED: ownerGroupId instead of ownerEmail
+export const getFilesByFolder = (folderId, ownerGroupId) => {
+    return api.get('/files', { params: { folderId, ownerGroupId } });
 };
 
-export const searchFiles = (query, ownerEmail) => {
-    return api.get('/files/search', { params: { query, ownerEmail } });
+// UPDATED: ownerGroupId instead of ownerEmail
+export const searchFiles = (query, ownerGroupId) => {
+    return api.get('/files/search', { params: { query, ownerGroupId } });
 };
 
 export const deleteFile = (id) => {

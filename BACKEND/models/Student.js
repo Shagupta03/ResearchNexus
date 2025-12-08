@@ -18,7 +18,8 @@ const StudentSchema = new mongoose.Schema({
     },
     Group_id: {
         type: String,
-        required: true
+        required: true,
+        set: v => String(v)
     }
 }, { timestamps: true });
 

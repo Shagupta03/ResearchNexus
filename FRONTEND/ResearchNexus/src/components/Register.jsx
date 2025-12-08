@@ -37,7 +37,7 @@ function Register({ onBackToLogin }) {
                     Name: formData.Name,
                     Gmail: formData.Gmail,
                     SuperVisor: formData.SuperVisor,
-                    Group_id: parseInt(formData.Group_id)
+                    Group_id: formData.Group_id
                 };
                 await registerStudent(data);
                 setMessage('Student registered successfully! You can now login.');
@@ -151,12 +151,12 @@ function Register({ onBackToLogin }) {
                             <div className="form-group">
                                 <label>Group ID</label>
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="Group_id"
                                     value={formData.Group_id}
                                     onChange={handleChange}
                                     required
-                                    placeholder="e.g., 1"
+                                    placeholder="e.g., A1, G01, CS202"
                                     className="input-field"
                                 />
                             </div>
