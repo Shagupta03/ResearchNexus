@@ -1,4 +1,4 @@
-// models/File.js - File Model (UPDATED)
+// models/File.js - File Model
 
 const mongoose = require('mongoose');
 
@@ -30,10 +30,6 @@ const FileSchema = new mongoose.Schema({
     },
     ownerEmail: {
         type: String,
-        required: true
-    },
-    Group_id: {  // ⬅️ ADDED
-        type: Number,
         required: true
     }
 }, { timestamps: true });

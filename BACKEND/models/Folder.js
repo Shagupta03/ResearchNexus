@@ -1,4 +1,4 @@
-// models/Folder.js - Folder Model (UPDATED)
+// models/Folder.js - Folder Model
 
 const mongoose = require('mongoose');
 
@@ -22,14 +22,10 @@ const FolderSchema = new mongoose.Schema({
     },
     Visibility: {
         type: Boolean,
-        default: true
+        default: true // true = public, false = private
     },
     ownerEmail: {
         type: String,
-        required: true
-    },
-    Group_id: {  // ⬅️ ADDED
-        type: Number,
         required: true
     }
 }, { timestamps: true });

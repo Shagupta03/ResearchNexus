@@ -1,5 +1,4 @@
-// src/components/Dashboard.jsx - Dashboard Component
-
+// src/components/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import {
     createFolder,
@@ -12,7 +11,8 @@ import {
     searchFiles,
     deleteFile
 } from '../services/api';
-import '../styles//Dashboard.css';
+
+import '../styles/Dashboard.css';
 
 function Dashboard({ user, userType, onLogout }) {
     const [folders, setFolders] = useState([]);
@@ -25,7 +25,6 @@ function Dashboard({ user, userType, onLogout }) {
 
     const [folderName, setFolderName] = useState('');
     const [folderVisibility, setFolderVisibility] = useState(true);
-    const [folderGroupId, setFolderGroupId] = useState('');
 
     const [editingFolder, setEditingFolder] = useState(null);
     const [editFolderName, setEditFolderName] = useState('');
@@ -33,22 +32,10 @@ function Dashboard({ user, userType, onLogout }) {
 
     const [fileName, setFileName] = useState('');
     const [fileVisibility, setFileVisibility] = useState(true);
-    const [fileGroupId, setFileGroupId] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
-
-    const [availableGroups, setAvailableGroups] = useState([]);
 
     useEffect(() => {
         loadFolders();
-        if (userType === 'supervisor') {
-            setAvailableGroups(user.groups || []);
-            setFolderGroupId(user.groups?.[0] || '');
-            setFileGroupId(user.groups?.[0] || '');
-        } else {
-            setAvailableGroups([user.Group_id]);
-            setFolderGroupId(user.Group_id);
-            setFileGroupId(user.Group_id);
-        }
     }, []);
 
     const loadFolders = async () => {
@@ -75,15 +62,13 @@ function Dashboard({ user, userType, onLogout }) {
             await createFolder({
                 Name: folderName,
                 Visibility: folderVisibility,
-                ownerEmail: user.Gmail,
-                Group_id: folderGroupId
+                ownerEmail: user.Gmail
             });
             setFolderName('');
             setShowCreateFolder(false);
             loadFolders();
         } catch (error) {
             console.error('Error creating folder:', error);
-            alert(error.response?.data?.message || 'Error creating folder');
         }
     };
 
@@ -95,7 +80,6 @@ function Dashboard({ user, userType, onLogout }) {
             formData.append('Folder', selectedFolder.id);
             formData.append('Visibility', fileVisibility);
             formData.append('ownerEmail', user.Gmail);
-            formData.append('Group_id', fileGroupId);
             formData.append('file', selectedFile);
 
             await uploadFile(formData);
@@ -106,7 +90,6 @@ function Dashboard({ user, userType, onLogout }) {
             loadFolders();
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert(error.response?.data?.message || 'Error uploading file');
         }
     };
 
@@ -138,7 +121,7 @@ function Dashboard({ user, userType, onLogout }) {
     const handleDeleteFolder = async (id) => {
         if (window.confirm('Delete this folder?')) {
             try {
-                await deleteFolder(id);
+            await deleteFolder(id);
                 loadFolders();
                 setSelectedFolder(null);
                 setFiles([]);
@@ -198,109 +181,96 @@ function Dashboard({ user, userType, onLogout }) {
     };
 
     return (
-        <div className="dashboard">
+        <div className="dashboard-wrapper">
+
             {/* Header */}
-            <div className="header">
+            <div className="dashboard-header">
                 <div>
                     <h2>File Management System</h2>
-                    <p className="user-info">Welcome, {user.Name} ({userType})</p>
+                    <p>Welcome, {user.Name} ({userType})</p>
                 </div>
-                <button className="btn-logout" onClick={onLogout}>
-                    Logout
-                </button>
+                <button className="logout-btn" onClick={onLogout}>Logout</button>
             </div>
 
-            {/* Search and Actions Bar */}
-            <div className="actions-bar">
+            {/* Search Bar */}
+            <div className="search-bar">
                 <input
                     type="text"
                     placeholder="Search folders..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
                 />
-                <button className="btn-primary" onClick={handleSearch}>
-                    Search
-                </button>
-                <button className="btn-primary" onClick={() => setShowCreateFolder(true)}>
-                    New Folder
-                </button>
+                <button onClick={handleSearch}>Search</button>
+                <button onClick={() => setShowCreateFolder(true)}>New Folder</button>
+
                 {selectedFolder && (
-                    <button className="btn-secondary" onClick={() => setShowUploadFile(true)}>
-                        Upload File
-                    </button>
+                    <button onClick={() => setShowUploadFile(true)}>Upload File</button>
                 )}
             </div>
 
-            {/* Main Content */}
             <div className="main-content">
-                {/* Folders List */}
-                <div className="folders-panel">
+
+                {/* Folder List */}
+                <div className="folder-list">
                     <h3>Folders</h3>
-                    {folders.map((folder) => (
+                    {folders.map(folder => (
                         <div
                             key={folder.id}
+                            className={`folder-item ${selectedFolder?.id === folder.id ? 'active' : ''}`}
                             onClick={() => handleFolderClick(folder)}
-                            className={`folder-item ${selectedFolder?.id === folder.id ? 'selected' : ''}`}
                         >
-                            <div className="folder-content">
-                                <div>
-                                    <div className="folder-name">📁 {folder.Name}</div>
-                                    <div className="folder-info">
-                                        {folder.File} files • {folder.Visibility ? '🌐 Public' : '🔒 Private'} • Group {folder.Group_id}
-                                    </div>
+                            <div className="folder-info">
+                                <div className="folder-name">📁 {folder.Name}</div>
+                                <div className="folder-meta">
+                                    {folder.File} files • {folder.Visibility ? "🌐 Public" : "🔒 Private"}
                                 </div>
-                                {folder.ownerEmail === user.Gmail && (
-                                    <div className="folder-actions">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleEditFolder(folder);
-                                            }}
-                                            className="btn-edit"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteFolder(folder.id);
-                                            }}
-                                            className="btn-delete"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                )}
                             </div>
+
+                            {folder.ownerEmail === user.Gmail && (
+                                <div className="folder-actions">
+                                    <button
+                                        className="edit-btn"
+                                        onClick={(e) => { e.stopPropagation(); handleEditFolder(folder); }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="delete-btn"
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.id); }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
 
-                {/* Files List */}
-                <div className="files-panel">
+                {/* File List */}
+                <div className="file-list">
                     {selectedFolder ? (
                         <>
                             <h3>Files in "{selectedFolder.Name}"</h3>
-                            <div className="files-grid">
-                                {files.map((file) => (
-                                    <div key={file.id} className="file-card">
+
+                            <div className="file-grid">
+                                {files.map(file => (
+                                    <div className="file-card" key={file.id}>
                                         <div className="file-icon">📄</div>
                                         <div className="file-name">{file.Name}</div>
-                                        <div className="file-info">
-                                            {file.Visibility ? '🌐 Public' : '🔒 Private'}
+                                        <div className="file-meta">
+                                            {file.Visibility ? "🌐 Public" : "🔒 Private"}
                                         </div>
+
                                         <div className="file-actions">
-                                            <button
+                                            <button className="download-btn"
                                                 onClick={() => handleDownloadFile(file.id)}
-                                                className="btn-download"
                                             >
                                                 Download
                                             </button>
+
                                             {file.ownerEmail === user.Gmail && (
-                                                <button
+                                                <button className="delete-btn"
                                                     onClick={() => handleDeleteFile(file.id)}
-                                                    className="btn-delete"
                                                 >
                                                     Delete
                                                 </button>
@@ -311,60 +281,40 @@ function Dashboard({ user, userType, onLogout }) {
                             </div>
                         </>
                     ) : (
-                        <div className="empty-state">
+                        <div className="empty-message">
                             Select a folder to view files
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Create Folder Modal */}
+            {/* Modals */}
             {showCreateFolder && (
                 <div className="modal-overlay">
-                    <div className="modal">
+                    <div className="modal-box">
                         <h3>Create New Folder</h3>
                         <form onSubmit={handleCreateFolder}>
-                            <div className="form-group">
-                                <label>Folder Name</label>
+                            <label>Folder Name</label>
+                            <input
+                                type="text"
+                                value={folderName}
+                                onChange={(e) => setFolderName(e.target.value)}
+                                required
+                            />
+
+                            <label className="checkbox">
                                 <input
-                                    type="text"
-                                    value={folderName}
-                                    onChange={(e) => setFolderName(e.target.value)}
-                                    required
-                                    className="form-input"
+                                    type="checkbox"
+                                    checked={folderVisibility}
+                                    onChange={(e) => setFolderVisibility(e.target.checked)}
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={folderVisibility}
-                                        onChange={(e) => setFolderVisibility(e.target.checked)}
-                                    />
-                                    Public Folder
-                                </label>
-                            </div>
-                            <div className="form-group">
-                                <label>Select Group</label>
-                                <select
-                                    value={folderGroupId}
-                                    onChange={(e) => setFolderGroupId(e.target.value)}
-                                    required
-                                    className="form-select"
-                                >
-                                    {availableGroups.map(group => (
-                                        <option key={group} value={group}>Group {group}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="modal-actions">
-                                <button type="submit" className="btn-submit">
-                                    Create
-                                </button>
-                                <button
-                                    type="button"
+                                Public Folder
+                            </label>
+
+                            <div className="modal-buttons">
+                                <button className="confirm-btn" type="submit">Create</button>
+                                <button className="cancel-btn" type="button"
                                     onClick={() => setShowCreateFolder(false)}
-                                    className="btn-cancel"
                                 >
                                     Cancel
                                 </button>
@@ -374,62 +324,39 @@ function Dashboard({ user, userType, onLogout }) {
                 </div>
             )}
 
-            {/* Upload File Modal */}
             {showUploadFile && (
                 <div className="modal-overlay">
-                    <div className="modal">
+                    <div className="modal-box">
                         <h3>Upload File</h3>
                         <form onSubmit={handleUploadFile}>
-                            <div className="form-group">
-                                <label>File Name</label>
+                            <label>File Name</label>
+                            <input
+                                type="text"
+                                value={fileName}
+                                onChange={(e) => setFileName(e.target.value)}
+                                required
+                            />
+
+                            <label>Select File</label>
+                            <input
+                                type="file"
+                                onChange={(e) => setSelectedFile(e.target.files[0])}
+                                required
+                            />
+
+                            <label className="checkbox">
                                 <input
-                                    type="text"
-                                    value={fileName}
-                                    onChange={(e) => setFileName(e.target.value)}
-                                    required
-                                    className="form-input"
+                                    type="checkbox"
+                                    checked={fileVisibility}
+                                    onChange={(e) => setFileVisibility(e.target.checked)}
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label>Select File</label>
-                                <input
-                                    type="file"
-                                    onChange={(e) => setSelectedFile(e.target.files[0])}
-                                    required
-                                    className="form-input"
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={fileVisibility}
-                                        onChange={(e) => setFileVisibility(e.target.checked)}
-                                    />
-                                    Public File
-                                </label>
-                            </div>
-                            <div className="form-group">
-                                <label>Select Group</label>
-                                <select
-                                    value={fileGroupId}
-                                    onChange={(e) => setFileGroupId(e.target.value)}
-                                    required
-                                    className="form-select"
-                                >
-                                    {availableGroups.map(group => (
-                                        <option key={group} value={group}>Group {group}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="modal-actions">
-                                <button type="submit" className="btn-submit">
-                                    Upload
-                                </button>
-                                <button
-                                    type="button"
+                                Public File
+                            </label>
+
+                            <div className="modal-buttons">
+                                <button className="confirm-btn" type="submit">Upload</button>
+                                <button className="cancel-btn" type="button"
                                     onClick={() => setShowUploadFile(false)}
-                                    className="btn-cancel"
                                 >
                                     Cancel
                                 </button>
@@ -439,40 +366,32 @@ function Dashboard({ user, userType, onLogout }) {
                 </div>
             )}
 
-            {/* Edit Folder Modal */}
             {showEditFolder && (
                 <div className="modal-overlay">
-                    <div className="modal">
+                    <div className="modal-box">
                         <h3>Edit Folder</h3>
                         <form onSubmit={handleUpdateFolder}>
-                            <div className="form-group">
-                                <label>Folder Name</label>
+                            <label>Folder Name</label>
+                            <input
+                                type="text"
+                                value={editFolderName}
+                                onChange={(e) => setEditFolderName(e.target.value)}
+                                required
+                            />
+
+                            <label className="checkbox">
                                 <input
-                                    type="text"
-                                    value={editFolderName}
-                                    onChange={(e) => setEditFolderName(e.target.value)}
-                                    required
-                                    className="form-input"
+                                    type="checkbox"
+                                    checked={editFolderVisibility}
+                                    onChange={(e) => setEditFolderVisibility(e.target.checked)}
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label className="checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={editFolderVisibility}
-                                        onChange={(e) => setEditFolderVisibility(e.target.checked)}
-                                    />
-                                    Public Folder
-                                </label>
-                            </div>
-                            <div className="modal-actions">
-                                <button type="submit" className="btn-submit">
-                                    Update
-                                </button>
-                                <button
-                                    type="button"
+                                Public Folder
+                            </label>
+
+                            <div className="modal-buttons">
+                                <button className="confirm-btn" type="submit">Update</button>
+                                <button className="cancel-btn" type="button"
                                     onClick={() => setShowEditFolder(false)}
-                                    className="btn-cancel"
                                 >
                                     Cancel
                                 </button>
@@ -481,6 +400,7 @@ function Dashboard({ user, userType, onLogout }) {
                     </div>
                 </div>
             )}
+
         </div>
     );
 }

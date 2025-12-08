@@ -1,9 +1,7 @@
-// controllers/fileController.js - File Controller (UPDATED)
+// controllers/fileController.js - File Controller
 
 const File = require('../models/File');
 const Folder = require('../models/Folder');
-const Supervisor = require('../models/Supervisor');
-const Student = require('../models/Student');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -26,7 +24,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 // Upload File
@@ -39,29 +37,14 @@ exports.uploadFile = async (req, res) => {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        const { Name, Folder: folderId, Visibility, ownerEmail, Group_id } = req.body;
+        const { Name, Folder: folderId, Visibility, ownerEmail } = req.body;
         const filePath = req.file.path;
 
-        if (!Name || !folderId || !ownerEmail || !Group_id) {
+        // Validate required fields
+        if (!Name || !folderId || !ownerEmail) {
             return res.status(400).json({
-                message: 'Missing required fields: Name, Folder, ownerEmail, or Group_id'
+                message: 'Missing required fields: Name, Folder, or ownerEmail'
             });
-        }
-
-        // Validate group access
-        const supervisor = await Supervisor.findOne({ Gmail: ownerEmail });
-        const student = await Student.findOne({ Gmail: ownerEmail });
-
-        const groupId = parseInt(Group_id);
-
-        if (supervisor) {
-            if (!supervisor.groups.includes(groupId)) {
-                return res.status(403).json({ message: 'You do not have access to this group' });
-            }
-        } else if (student) {
-            if (student.Group_id !== groupId) {
-                return res.status(403).json({ message: 'You do not have access to this group' });
-            }
         }
 
         const lastFile = await File.findOne().sort({ id: -1 });
@@ -73,12 +56,12 @@ exports.uploadFile = async (req, res) => {
             id: newId,
             Visibility: Visibility === 'true' || Visibility === true,
             filePath,
-            ownerEmail,
-            Group_id: groupId
+            ownerEmail
         });
 
         await newFile.save();
 
+        // Update folder file count
         await Folder.findOneAndUpdate(
             { id: parseInt(folderId) },
             { $inc: { File: 1 } }
@@ -96,21 +79,8 @@ exports.getFilesByFolder = async (req, res) => {
     try {
         const { folderId, ownerEmail } = req.query;
 
-        // Get user's groups
-        const supervisor = await Supervisor.findOne({ Gmail: ownerEmail });
-        const student = await Student.findOne({ Gmail: ownerEmail });
-
-        let allowedGroups = [];
-
-        if (supervisor) {
-            allowedGroups = supervisor.groups;
-        } else if (student) {
-            allowedGroups = [student.Group_id];
-        }
-
         const files = await File.find({
             Folder: parseInt(folderId),
-            Group_id: { $in: allowedGroups },
             $or: [
                 { ownerEmail: ownerEmail },
                 { Visibility: true }
@@ -129,21 +99,8 @@ exports.searchFiles = async (req, res) => {
     try {
         const { query, ownerEmail } = req.query;
 
-        // Get user's groups
-        const supervisor = await Supervisor.findOne({ Gmail: ownerEmail });
-        const student = await Student.findOne({ Gmail: ownerEmail });
-
-        let allowedGroups = [];
-
-        if (supervisor) {
-            allowedGroups = supervisor.groups;
-        } else if (student) {
-            allowedGroups = [student.Group_id];
-        }
-
         const files = await File.find({
             Name: { $regex: query, $options: 'i' },
-            Group_id: { $in: allowedGroups },
             $or: [
                 { ownerEmail: ownerEmail },
                 { Visibility: true }
@@ -156,6 +113,36 @@ exports.searchFiles = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Delete File
+exports.deleteFile = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const file = await File.findOne({ id: parseInt(id) });
+
+        if (!file) {
+            return res.status(404).json({ message: 'File not found' });
+        }
+
+        // Delete physical file
+        if (fs.existsSync(file.filePath)) {
+            fs.unlinkSync(file.filePath);
+        }
+
+        await Folder.findOneAndUpdate(
+            { id: file.Folder },
+            { $inc: { File: -1 } }
+        );
+
+        await File.findOneAndDelete({ id: parseInt(id) });
+        res.status(200).json({ message: 'File deleted' });
+    } catch (error) {
+        console.error('Delete file error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+// controllers/fileController.js - Add this function
 
 // Download File
 exports.downloadFile = async (req, res) => {
@@ -176,34 +163,6 @@ exports.downloadFile = async (req, res) => {
         res.download(filePath, file.Name);
     } catch (error) {
         console.error('Download file error:', error);
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// Delete File
-exports.deleteFile = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const file = await File.findOne({ id: parseInt(id) });
-
-        if (!file) {
-            return res.status(404).json({ message: 'File not found' });
-        }
-
-        if (fs.existsSync(file.filePath)) {
-            fs.unlinkSync(file.filePath);
-        }
-
-        await Folder.findOneAndUpdate(
-            { id: file.Folder },
-            { $inc: { File: -1 } }
-        );
-
-        await File.findOneAndDelete({ id: parseInt(id) });
-        res.status(200).json({ message: 'File deleted' });
-    } catch (error) {
-        console.error('Delete file error:', error);
         res.status(500).json({ message: error.message });
     }
 };

@@ -1,4 +1,4 @@
-// controllers/authController.js - Authentication Controller (UPDATED)
+// controllers/authController.js - Authentication Controller
 
 const Supervisor = require('../models/Supervisor');
 const Student = require('../models/Student');
@@ -34,16 +34,11 @@ exports.registerSupervisor = async (req, res) => {
     try {
         const { Name, Interest, Gmail, groups } = req.body;
 
-        // Convert groups to numbers
-        const groupNumbers = Array.isArray(groups)
-            ? groups.map(g => parseInt(g))
-            : [parseInt(groups)];
-
         const newSupervisor = new Supervisor({
             Name,
             Interest,
             Gmail,
-            groups: groupNumbers
+            groups
         });
 
         await newSupervisor.save();
@@ -62,7 +57,7 @@ exports.registerStudent = async (req, res) => {
             Name,
             SuperVisor,
             Gmail,
-            Group_id: parseInt(Group_id)
+            Group_id
         });
 
         await newStudent.save();

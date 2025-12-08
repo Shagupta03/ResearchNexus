@@ -1,5 +1,4 @@
-/* src/components/Register.css */
-
+/* Full page background */
 .register-page {
     min-height: 100vh;
     display: flex;
@@ -8,6 +7,7 @@
     background: linear-gradient(135deg, #638ECB 0%, #395886 100%);
 }
 
+/* Card container */
 .register-container {
     background: #F0F3FA;
     padding: 40px;
@@ -21,9 +21,10 @@
     color: #395886;
     margin-bottom: 30px;
     text-align: center;
-    font-weight: bold;
+    font-weight: 700;
 }
 
+/* Form groups */
 .form-group {
     margin-bottom: 20px;
 }
@@ -35,17 +36,23 @@
     font-weight: 600;
 }
 
-input,
-select {
+/* Input fields */
+.input-field {
     width: 100%;
     padding: 12px;
     border: 2px solid #D5DEEF;
     border-radius: 6px;
     font-size: 16px;
     box-sizing: border-box;
+    outline: none;
 }
 
-.success-box {
+.input-field:focus {
+    border-color: #638ECB;
+}
+
+/* Success & error messages */
+.success-msg {
     color: #28a745;
     background: #d4edda;
     padding: 10px;
@@ -54,7 +61,7 @@ select {
     font-size: 14px;
 }
 
-.error-box {
+.error-msg {
     color: #d9534f;
     background: #f8d7da;
     padding: 10px;
@@ -63,7 +70,9 @@ select {
     font-size: 14px;
 }
 
-.btn {
+/* Buttons */
+.btn-primary,
+.btn-secondary {
     width: 100%;
     padding: 14px;
     border: none;
@@ -75,20 +84,22 @@ select {
     transition: background 0.3s ease;
 }
 
-.register-btn {
+/* Primary button */
+.btn-primary {
     background: #638ECB;
     color: white;
 }
 
-.register-btn:hover {
+.btn-primary:hover {
     background: #395886;
 }
 
-.back-btn {
+/* Secondary button */
+.btn-secondary {
     background: #D5DEEF;
     color: #395886;
 }
 
-.back-btn:hover {
+.btn-secondary:hover {
     background: #B1C9EF;
 }

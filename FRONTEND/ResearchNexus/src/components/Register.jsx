@@ -1,7 +1,8 @@
 // src/components/Register.jsx
+
 import { useState } from 'react';
 import { registerSupervisor, registerStudent } from '../services/api';
-import '../styles//Register.css';
+import './Register.css';
 
 function Register({ onBackToLogin }) {
     const [userType, setUserType] = useState('student');
@@ -27,7 +28,7 @@ function Register({ onBackToLogin }) {
                     Name: formData.Name,
                     Gmail: formData.Gmail,
                     Interest: formData.Interest,
-                    groups: formData.groups.split(',').map(g => parseInt(g.trim()))
+                    groups: formData.groups.split(',').map(g => g.trim())
                 };
                 await registerSupervisor(data);
                 setMessage('Supervisor registered successfully! You can now login.');
@@ -68,9 +69,14 @@ function Register({ onBackToLogin }) {
                 <h2 className="register-title">Register New User</h2>
 
                 <form onSubmit={handleSubmit}>
+
                     <div className="form-group">
                         <label>User Type</label>
-                        <select value={userType} onChange={(e) => setUserType(e.target.value)}>
+                        <select
+                            value={userType}
+                            onChange={(e) => setUserType(e.target.value)}
+                            className="input-field"
+                        >
                             <option value="student">Student</option>
                             <option value="supervisor">Supervisor</option>
                         </select>
@@ -78,47 +84,93 @@ function Register({ onBackToLogin }) {
 
                     <div className="form-group">
                         <label>Name</label>
-                        <input type="text" name="Name" value={formData.Name} onChange={handleChange} required />
+                        <input
+                            type="text"
+                            name="Name"
+                            value={formData.Name}
+                            onChange={handleChange}
+                            required
+                            className="input-field"
+                        />
                     </div>
 
                     <div className="form-group">
                         <label>Email (Gmail)</label>
-                        <input type="email" name="Gmail" value={formData.Gmail} onChange={handleChange} required />
+                        <input
+                            type="email"
+                            name="Gmail"
+                            value={formData.Gmail}
+                            onChange={handleChange}
+                            required
+                            className="input-field"
+                        />
                     </div>
 
                     {userType === 'supervisor' ? (
                         <>
                             <div className="form-group">
                                 <label>Research Interest</label>
-                                <input type="text" name="Interest" value={formData.Interest} onChange={handleChange} required />
+                                <input
+                                    type="text"
+                                    name="Interest"
+                                    value={formData.Interest}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g., Machine Learning"
+                                    className="input-field"
+                                />
                             </div>
 
                             <div className="form-group">
-                                <label>Groups (comma separated numbers)</label>
-                                <input type="text" name="groups" value={formData.groups} onChange={handleChange} />
+                                <label>Groups (comma separated)</label>
+                                <input
+                                    type="text"
+                                    name="groups"
+                                    value={formData.groups}
+                                    onChange={handleChange}
+                                    placeholder="e.g., 101, 102"
+                                    className="input-field"
+                                />
                             </div>
                         </>
                     ) : (
                         <>
                             <div className="form-group">
                                 <label>Supervisor Name</label>
-                                <input type="text" name="SuperVisor" value={formData.SuperVisor} onChange={handleChange} required />
+                                <input
+                                    type="text"
+                                    name="SuperVisor"
+                                    value={formData.SuperVisor}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g., Dr. Smith"
+                                    className="input-field"
+                                />
                             </div>
 
                             <div className="form-group">
                                 <label>Group ID</label>
-                                <input type="number" name="Group_id" value={formData.Group_id} onChange={handleChange} required />
+                                <input
+                                    type="number"
+                                    name="Group_id"
+                                    value={formData.Group_id}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="e.g., 1"
+                                    className="input-field"
+                                />
                             </div>
                         </>
                     )}
 
-                    {message && <div className="success-box">{message}</div>}
-                    {error && <div className="error-box">{error}</div>}
+                    {message && <div className="success-msg">{message}</div>}
+                    {error && <div className="error-msg">{error}</div>}
 
-                    <button type="submit" className="btn register-btn">Register</button>
-                    <button type="button" onClick={onBackToLogin} className="btn back-btn">
+                    <button type="submit" className="btn-primary">Register</button>
+                    <button type="button" onClick={onBackToLogin} className="btn-secondary">
                         Back to Login
                     </button>
+
                 </form>
             </div>
         </div>

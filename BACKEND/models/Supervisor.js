@@ -1,4 +1,4 @@
-// models/Supervisor.js - Supervisor Model (UPDATED)
+// models/Supervisor.js - Supervisor Model
 
 const mongoose = require('mongoose');
 
@@ -14,10 +14,11 @@ const SupervisorSchema = new mongoose.Schema({
     Gmail: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        primary: true
     },
     groups: {
-        type: [Number],  // ⬅️ CHANGED FROM [String] TO [Number]
+        type: [String],
         default: []
     }
 }, { timestamps: true });
