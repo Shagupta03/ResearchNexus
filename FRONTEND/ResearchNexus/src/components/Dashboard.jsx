@@ -21,7 +21,6 @@ import {
 } from '../services/api';
 import '../styles/Dashboard.css';
 
-
 function Dashboard({ user, userType, onLogout }) {
   // Existing state
   const [folders, setFolders] = useState([]);
@@ -59,6 +58,9 @@ function Dashboard({ user, userType, onLogout }) {
   const [studentFeedbacks, setStudentFeedbacks] = useState([]);
   const [workFile, setWorkFile] = useState(null);
   const [professorEmail, setProfessorEmail] = useState('');
+  const [showFilePreview, setShowFilePreview] = useState(false);
+  const [previewFileUrl, setPreviewFileUrl] = useState('');
+  const [previewFileName, setPreviewFileName] = useState('');
 
   useEffect(() => {
     loadFolders();
@@ -207,6 +209,20 @@ function Dashboard({ user, userType, onLogout }) {
     window.open(`http://localhost:9222/api/files/download/${fileId}`, '_blank');
   };
 
+  const handleDownloadPreviewFile = (filePath) => {
+    // Extract filename from path and create download URL
+    const fileName = filePath.split('\\').pop().split('/').pop();
+    window.open(`http://localhost:9222/api/preview/download/${fileName}`, '_blank');
+  };
+
+  const handleViewPreviewFile = (filePath) => {
+    const fileName = filePath.split('\\').pop().split('/').pop();
+    const fileUrl = `http://localhost:9222/api/preview/download/${fileName}`;
+    setPreviewFileUrl(fileUrl);
+    setPreviewFileName(fileName);
+    setShowFilePreview(true);
+  };
+
   const handleDeleteFile = async (id) => {
     if (window.confirm('Delete this file?')) {
       try {
@@ -308,15 +324,21 @@ function Dashboard({ user, userType, onLogout }) {
       return;
     }
 
+    if (!professorEmail || !professorEmail.includes('@')) {
+      alert('Please enter a valid professor email address (e.g., gra@gmail.com)');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', workFile);
     formData.append('student_email', user.Gmail);
-    formData.append('professor_email', professorEmail || user.SuperVisor);
+    formData.append('professor_email', professorEmail);
 
     try {
       await sendWorkForPreview(formData);
       alert('Work submitted successfully!');
       setWorkFile(null);
+      setProfessorEmail('');
       e.target.reset();
     } catch (error) {
       console.error('Error submitting work:', error);
@@ -587,14 +609,18 @@ function Dashboard({ user, userType, onLogout }) {
             <h2>Submit Work for Preview</h2>
             <form onSubmit={handleSubmitWork}>
               <div className="form-group">
-                <label className="form-label">Professor Email (optional):</label>
+                <label className="form-label">Professor Email:</label>
                 <input
                   type="email"
                   value={professorEmail}
                   onChange={(e) => setProfessorEmail(e.target.value)}
-                  placeholder={user.SuperVisor || "Enter professor email"}
+                  placeholder="Enter professor email (e.g., gra@gmail.com)"
+                  required
                   className="form-input"
                 />
+                <small style={{ color: '#638ECB', marginTop: '5px', display: 'block' }}>
+                  ⚠️ Enter the professor's email address (not name). Example: gra@gmail.com
+                </small>
               </div>
               <div className="form-group">
                 <label className="form-label">Select File:</label>
@@ -616,8 +642,31 @@ function Dashboard({ user, userType, onLogout }) {
         {activeTab === 'submissions' && userType === 'supervisor' && (
           <div className="task-section">
             <h2>Student Work Submissions</h2>
+            <div style={{ 
+              background: '#fff3cd', 
+              padding: '15px', 
+              borderRadius: '8px', 
+              marginBottom: '20px',
+              border: '1px solid #ffc107'
+            }}>
+              <strong>📧 Your Email:</strong> {user.Gmail}
+              <br />
+              <small style={{ color: '#856404' }}>
+                Students must submit work to this exact email address to appear here.
+              </small>
+            </div>
             {works.length === 0 ? (
-              <p className="no-submissions">No submissions yet</p>
+              <div style={{ 
+                background: '#f8f9fa', 
+                padding: '30px', 
+                borderRadius: '8px', 
+                textAlign: 'center' 
+              }}>
+                <p className="no-submissions">No submissions yet</p>
+                <small style={{ color: '#6c757d' }}>
+                  Make sure students are submitting to: <strong>{user.Gmail}</strong>
+                </small>
+              </div>
             ) : (
               <div className="work-list">
                 {works.map((work) => (
@@ -629,7 +678,25 @@ function Dashboard({ user, userType, onLogout }) {
                       </span>
                     </div>
                     <div className="work-file">
-                      <strong>File:</strong> {work.file}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ flex: 1 }}>
+                          <strong>File:</strong> {work.file.split('\\').pop().split('/').pop()}
+                        </div>
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button
+                            onClick={() => handleViewPreviewFile(work.file)}
+                            className="btn btn-primary btn-small"
+                          >
+                            👁️ View
+                          </button>
+                          <button
+                            onClick={() => handleDownloadPreviewFile(work.file)}
+                            className="btn btn-secondary btn-small"
+                          >
+                            📥 Download
+                          </button>
+                        </div>
+                      </div>
                     </div>
                     {work.feedback && (
                       <div className="existing-feedback">
@@ -855,6 +922,78 @@ function Dashboard({ user, userType, onLogout }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* File Preview Modal */}
+      {showFilePreview && (
+        <div className="modal-overlay" onClick={() => setShowFilePreview(false)}>
+          <div 
+            className="modal-content" 
+            style={{ maxWidth: '90%', maxHeight: '90vh', width: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <h3 style={{ margin: 0 }}>File Preview: {previewFileName}</h3>
+              <button
+                onClick={() => setShowFilePreview(false)}
+                className="btn btn-danger btn-small"
+              >
+                ✕ Close
+              </button>
+            </div>
+            
+            <div style={{ maxHeight: '70vh', overflow: 'auto', background: '#f8f9fa', padding: '10px', borderRadius: '6px' }}>
+              {previewFileName.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                <img 
+                  src={previewFileUrl} 
+                  alt="Preview" 
+                  style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
+                />
+              ) : previewFileName.match(/\.(pdf)$/i) ? (
+                <iframe
+                  src={previewFileUrl}
+                  style={{ width: '100%', height: '70vh', border: 'none' }}
+                  title="PDF Preview"
+                />
+              ) : previewFileName.match(/\.(mp4|webm|ogg)$/i) ? (
+                <video 
+                  controls 
+                  style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto' }}
+                >
+                  <source src={previewFileUrl} />
+                  Your browser does not support video playback.
+                </video>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <p style={{ color: '#6c757d', marginBottom: '20px' }}>
+                    Preview not available for this file type.
+                  </p>
+                  <button
+                    onClick={() => handleDownloadPreviewFile(previewFileName)}
+                    className="btn btn-primary"
+                  >
+                    📥 Download File
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => handleDownloadPreviewFile(previewFileName)}
+                className="btn btn-primary"
+              >
+                📥 Download File
+              </button>
+              <button
+                onClick={() => setShowFilePreview(false)}
+                className="btn btn-cancel"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

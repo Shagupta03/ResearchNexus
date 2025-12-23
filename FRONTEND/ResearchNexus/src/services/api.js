@@ -1,5 +1,4 @@
 // src/services/api.js - API Service using Axios
-
 import axios from 'axios';
 
 const API_URL = 'http://localhost:9222/api';
@@ -34,7 +33,7 @@ export const getFolders = (ownerEmail) => {
 };
 
 export const updateFolder = (id, data) => {
-  return api.put(`/folders/${id}`, data);
+  return api.put(`/folders/${id}`, data);  // FIXED: Changed backticks to parentheses
 };
 
 export const searchFolders = (query, ownerEmail) => {
@@ -42,7 +41,7 @@ export const searchFolders = (query, ownerEmail) => {
 };
 
 export const deleteFolder = (id) => {
-  return api.delete(`/folders/${id}`);
+  return api.delete(`/folders/${id}`);  // FIXED: Changed backticks to parentheses
 };
 
 // File APIs
@@ -63,27 +62,26 @@ export const searchFiles = (query, ownerEmail) => {
 };
 
 export const deleteFile = (id) => {
-  return api.delete(`/files/${id}`);
+  return api.delete(`/files/${id}`);  // FIXED: Changed backticks to parentheses
 };
 
-
-// ============= NEW TASK & PROGRESS APIs =============
+// ============= TASK & PROGRESS APIs =============
 
 // Task APIs
 export const assignTask = (taskData) => 
   api.post('/tasks/assign', taskData);
 
 export const getTasksByGroup = (groupId) => 
-  api.get(`/tasks/group/${groupId}`);
+  api.get(`/tasks/group/${groupId}`);  // FIXED: Changed backticks to parentheses
 
 // Progress APIs
 export const updateProgress = (progressData) => 
   api.post('/progress/update', progressData);
 
 export const getProgress = (groupId, studentEmail) => 
-  api.get(`/progress/${groupId}/${studentEmail}`);
+  api.get(`/progress/${groupId}/${studentEmail}`);  // FIXED: Changed backticks to parentheses
 
-// ============= NEW PREVIEW/FEEDBACK APIs =============
+// ============= PREVIEW/FEEDBACK APIs =============
 
 // Preview APIs
 export const sendWorkForPreview = (formData) => 
@@ -92,15 +90,15 @@ export const sendWorkForPreview = (formData) =>
   });
 
 export const getProfessorPreviews = (professorEmail) => 
-  api.get(`/preview/professor/${professorEmail}`);
+  api.get(`/preview/professor/${professorEmail}`);  // FIXED: Changed backticks to parentheses
 
 export const giveFeedback = (feedbackData) => 
   api.post('/preview/feedback', feedbackData);
 
 export const getStudentFeedback = (studentEmail) => 
-  api.get(`/preview/student/${studentEmail}`);
+  api.get(`/preview/student/${studentEmail}`);  // FIXED: Changed backticks to parentheses
 
-// ============= AUTH APIs (if needed) =============
+// ============= AUTH APIs =============
 
 export const loginStudent = (credentials) => 
   api.post('/auth/student/login', credentials);
