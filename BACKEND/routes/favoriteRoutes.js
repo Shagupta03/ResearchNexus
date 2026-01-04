@@ -5,4 +5,8 @@ const { getFavorites, toggleFavorite } = require('../controllers/favoritesContro
 router.get('/:userEmail', getFavorites);
 router.post('/toggle', toggleFavorite);
 
+
+
+
+
 module.exports = router;

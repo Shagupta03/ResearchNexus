@@ -154,7 +154,7 @@ export const uploadDocument = (formData) =>
 
 
 
-  // ⭐ FAVORITES APIs
+  // ⭐ FAVORITES APIs //shagupta
 export const addFavorite = (fileId, userEmail) =>
   api.post('/favorites', { fileId, userEmail });
 
@@ -170,6 +170,15 @@ export const getAnnouncements = () =>
 
 export const createAnnouncement = (announcementData) =>
   api.post('/announcements/create', announcementData);
+// ============= ACTIVITY / PRODUCTIVITY APIs =============
+
+// Log activity (add minutes to today's entry)
+export const logActivity = (userEmail, minutes = 1) =>
+  api.post('/activity/log', { email: userEmail, minutes });
+
+// Get weekly productivity summary
+export const getWeeklyProductivity = (userEmail) =>
+  api.get(`/activity/weekly/${userEmail}`);
 
 
 // ... (keep all your existing code) ...

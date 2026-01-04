@@ -15,6 +15,8 @@ function Profile({ user, userType }) {
     });
   }, [user, userType]);
 
+
+  
   const handleUpdate = async () => {
     await updateProfile({
       email: user.Gmail,
@@ -25,6 +27,9 @@ function Profile({ user, userType }) {
     alert('Profile updated');
   };
   if (!profile) return <p className="profile-loading">Loading...</p>;
+
+
+
 
 
   return (
@@ -54,5 +59,8 @@ function Profile({ user, userType }) {
     </div>
   );
 }
+
+
+
 
 export default Profile;

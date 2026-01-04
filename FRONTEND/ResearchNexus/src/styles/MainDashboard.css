@@ -170,3 +170,30 @@
   text-decoration: underline;
   cursor: pointer;
 }
+/* =============================== */
+/* PRODUCTIVITY / ACTIVITY SECTION */
+/* =============================== */
+
+.productivity-section {
+  margin: 40px auto;
+  width: 520px;
+  background: #1f3b64;          /* same tone as alert bar */
+  border-radius: 30px;
+  padding: 20px 30px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.productivity-section h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.productivity-section p {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #ffdd57;               /* highlight time */
+  font-weight: bold;
+}

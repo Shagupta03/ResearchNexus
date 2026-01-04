@@ -1,15 +1,47 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { logActivity, getWeeklyProductivity } from '../services/api';
 import axios from "axios";
 import "../styles/MainDashboard.css";
 import brainImg from "../assets/brain.png";
+import { useActivityTracker } from '../hooks/useActivityTracker';
+
 
 const MainDashboard = ({ user, userType, onLogout }) => {
   const [dashboardData, setDashboardData] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
+  const [weeklySummary, setWeeklySummary] = useState(0);
   const navigate = useNavigate();
 
   const studentEmail = user?.email;
+  useEffect(() => {
+  const interval = setInterval(() => {
+    logActivity(user.Gmail);
+  }, 60000); // 1 minute
+
+  return () => clearInterval(interval);
+}, [user]);
+  
+  useActivityTracker(user?.Gmail, !!user);
+  useEffect(() => {
+    if (user?.Gmail) loadWeeklySummary();
+  }, [user]);
+
+  const loadWeeklySummary = async () => {
+    try {
+      const res = await axios.get(`http://localhost:9222/api/activity/weekly/${user.Gmail}`);
+      setWeeklySummary(res.data.weeklySummary);
+    } catch (err) {
+      console.error('Failed to load weekly summary', err);
+    }
+  };
+  useEffect(() => {
+  const loadSummary = async () => {
+    const res = await getWeeklyProductivity(user.Gmail);
+    setWeeklySummary(res.data.weeklySummary);
+  };
+  loadSummary();
+}, [user]);
 
   useEffect(() => {
     if (studentEmail) loadDashboard();
@@ -141,6 +173,13 @@ const MainDashboard = ({ user, userType, onLogout }) => {
           <p>Connect with peers, join groups, share knowledge</p>
         </div>
       </div>
+      {/* PRODUCTIVITY SECTION */}
+    <div className="productivity-section">
+      <h3>Your Weekly Productivity</h3>
+      <p>
+        Total time spent this week: {Math.floor(weeklySummary / 60)}h {weeklySummary % 60}m
+      </p>
+    </div>
 
       {/* FOOTER */}
       <footer className="dashboard-footer">

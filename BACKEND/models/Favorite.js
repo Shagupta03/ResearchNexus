@@ -12,6 +12,9 @@ const FavoriteSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+
+
+
 FavoriteSchema.index({ userEmail: 1, fileId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Favorite', FavoriteSchema);
